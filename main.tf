@@ -8,12 +8,15 @@ data "external" "myipaddr" {
 
 
 resource "aws_instance" "demo-server" {
-  ami                    = "ami-051f8a213df8bc089"
+  ami                    = "ami-080e1f13689e07408"
   instance_type          = "t2.micro"
   key_name               = "ford30066"
   vpc_security_group_ids = [aws_security_group.ssh-sg.id]
   subnet_id              = aws_subnet.dpw-public_subnet_01.id
-
+  for_each               = toset(["jenkins-master", "jenkins-slave", "ansible"])
+  tags = {
+    Name = "${each.key}"
+  }
 }
 
 resource "aws_vpc" "dpw-vpc" {
@@ -68,6 +71,11 @@ resource "aws_route_table" "dpw-public-rt" {
 
 resource "aws_route_table_association" "dpw-rta-public-subnet-1" {
   subnet_id      = aws_subnet.dpw-public_subnet_01.id
+  route_table_id = aws_route_table.dpw-public-rt.id
+}
+
+resource "aws_route_table_association" "dpw-rta-public-subnet-2" {
+  subnet_id      = aws_subnet.dpw-public_subnet_02.id
   route_table_id = aws_route_table.dpw-public-rt.id
 }
 
